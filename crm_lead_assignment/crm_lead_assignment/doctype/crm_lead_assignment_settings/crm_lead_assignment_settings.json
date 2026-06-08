@@ -1,0 +1,215 @@
+{
+ "actions": [],
+ "creation": "2026-06-08 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "general_section",
+  "enabled",
+  "queue_enabled",
+  "auto_assign_on_insert",
+  "auto_reassign_on_update",
+  "disable_manual_assign_to",
+  "guards_section",
+  "enforce_team_leader_guard",
+  "sync_todo",
+  "sync_docshare",
+  "sync_team",
+  "notify_manual_assign",
+  "queue_section",
+  "default_queue",
+  "bulk_queue",
+  "scheduler_queue",
+  "bulk_inline_limit",
+  "queue_batch_size",
+  "fallback_section",
+  "default_strategy",
+  "fallback_user",
+  "fallback_team",
+  "stale_reassignment_section",
+  "stale_reassignment_enabled",
+  "stale_after_minutes"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "default": "1",
+   "fieldname": "queue_enabled",
+   "fieldtype": "Check",
+   "label": "Queue Enabled"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_assign_on_insert",
+   "fieldtype": "Check",
+   "label": "Auto Assign On Insert"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_reassign_on_update",
+   "fieldtype": "Check",
+   "label": "Auto Reassign On Update"
+  },
+  {
+   "default": "1",
+   "fieldname": "disable_manual_assign_to",
+   "fieldtype": "Check",
+   "label": "Disable Native Assign To UI"
+  },
+  {
+   "fieldname": "guards_section",
+   "fieldtype": "Section Break",
+   "label": "Guards And Sync"
+  },
+  {
+   "default": "1",
+   "fieldname": "enforce_team_leader_guard",
+   "fieldtype": "Check",
+   "label": "Enforce Team Leader Assignment Guard"
+  },
+  {
+   "default": "1",
+   "fieldname": "sync_todo",
+   "fieldtype": "Check",
+   "label": "Sync ToDo"
+  },
+  {
+   "default": "1",
+   "fieldname": "sync_docshare",
+   "fieldtype": "Check",
+   "label": "Sync DocShare"
+  },
+  {
+   "default": "1",
+   "fieldname": "sync_team",
+   "fieldtype": "Check",
+   "label": "Sync Team"
+  },
+  {
+   "default": "0",
+   "fieldname": "notify_manual_assign",
+   "fieldtype": "Check",
+   "label": "Notify Manual Assignments"
+  },
+  {
+   "fieldname": "queue_section",
+   "fieldtype": "Section Break",
+   "label": "Queues"
+  },
+  {
+   "default": "lead_assignment_short",
+   "fieldname": "default_queue",
+   "fieldtype": "Data",
+   "label": "Default Queue"
+  },
+  {
+   "default": "lead_assignment_bulk",
+   "fieldname": "bulk_queue",
+   "fieldtype": "Data",
+   "label": "Bulk Queue"
+  },
+  {
+   "default": "lead_assignment_scheduler",
+   "fieldname": "scheduler_queue",
+   "fieldtype": "Data",
+   "label": "Scheduler Queue"
+  },
+  {
+   "default": "20",
+   "fieldname": "bulk_inline_limit",
+   "fieldtype": "Int",
+   "label": "Bulk Inline Limit"
+  },
+  {
+   "default": "100",
+   "fieldname": "queue_batch_size",
+   "fieldtype": "Int",
+   "label": "Queue Batch Size"
+  },
+  {
+   "fieldname": "fallback_section",
+   "fieldtype": "Section Break",
+   "label": "Fallback"
+  },
+  {
+   "default": "Balanced Load",
+   "fieldname": "default_strategy",
+   "fieldtype": "Select",
+   "label": "Default Strategy",
+   "options": "Round Robin\nBalanced Load\nWeighted Balanced\nSkill Based"
+  },
+  {
+   "fieldname": "fallback_user",
+   "fieldtype": "Link",
+   "label": "Fallback User",
+   "options": "User"
+  },
+  {
+   "fieldname": "fallback_team",
+   "fieldtype": "Link",
+   "label": "Fallback Team",
+   "options": "Team"
+  },
+  {
+   "fieldname": "stale_reassignment_section",
+   "fieldtype": "Section Break",
+   "label": "Stale Reassignment"
+  },
+  {
+   "default": "0",
+   "fieldname": "stale_reassignment_enabled",
+   "fieldtype": "Check",
+   "label": "Stale Reassignment Enabled"
+  },
+  {
+   "default": "120",
+   "fieldname": "stale_after_minutes",
+   "fieldtype": "Int",
+   "label": "Stale After Minutes"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-06-08 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "CRM Lead Assignment",
+ "name": "CRM Lead Assignment Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
+

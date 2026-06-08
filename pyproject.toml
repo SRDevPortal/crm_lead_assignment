@@ -1,0 +1,39 @@
+[project]
+name = "crm_lead_assignment"
+dynamic = ["version"]
+description = "High-volume CRM Lead assignment engine"
+authors = [
+    { name = "SRIAAS", email = "webdevelopersriaas@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0,<16.0.0"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "UP", "B", "RUF"]
+ignore = [
+    "B017",
+    "B018",
+    "B023",
+    "B904",
+    "E101",
+    "E402",
+    "E501",
+    "F401",
+    "W191"
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"

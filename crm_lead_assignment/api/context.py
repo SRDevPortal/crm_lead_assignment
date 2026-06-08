@@ -1,0 +1,29 @@
+from __future__ import annotations
+
+import frappe
+
+from crm_lead_assignment.integrations.role_permissions import (
+	get_managed_team_users,
+	has_agent_role,
+	has_team_leader_role,
+	is_effective_team_leader,
+	is_privileged,
+)
+from crm_lead_assignment.settings import get_settings
+
+
+@frappe.whitelist()
+def get_crm_lead_assignment_context() -> dict:
+	user = frappe.session.user
+	settings = get_settings()
+	return {
+		"user": user,
+		"enabled": bool(settings.enabled),
+		"disable_manual_assign_to": bool(settings.disable_manual_assign_to),
+		"can_manage_assignment": is_privileged(user) or is_effective_team_leader(user),
+		"is_privileged": is_privileged(user),
+		"has_team_leader_role": has_team_leader_role(user),
+		"has_agent_role": has_agent_role(user),
+		"managed_team_users": get_managed_team_users(user),
+	}
+

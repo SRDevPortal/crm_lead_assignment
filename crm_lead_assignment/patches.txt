@@ -1,0 +1,2 @@
+crm_lead_assignment.patches.v1_0.ensure_indexes
+crm_lead_assignment.patches.v1_0.drop_deprecated_source_id_field
