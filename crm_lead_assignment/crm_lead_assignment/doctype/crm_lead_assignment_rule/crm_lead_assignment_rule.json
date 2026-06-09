@@ -13,6 +13,7 @@
   "strategy",
   "team",
   "target_agents",
+  "target_source",
   "filters_section",
   "pipeline",
   "source_id_values",
@@ -77,6 +78,13 @@
    "label": "Target Agents"
   },
   {
+   "description": "Optional. Source to set on CRM Lead when this rule assigns an owner.",
+   "fieldname": "target_source",
+   "fieldtype": "Link",
+   "label": "Target Source",
+   "options": "SR Lead Source"
+  },
+  {
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
    "label": "Filters"
@@ -100,7 +108,7 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Source",
-   "options": "CRM Lead Source"
+   "options": "SR Lead Source"
   },
   {
    "fieldname": "campaign",

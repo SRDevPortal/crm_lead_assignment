@@ -22,6 +22,7 @@ def assign_lead(
 	strategy: str | None = None,
 	queue: str | None = None,
 	team: str | None = None,
+	source: str | None = None,
 	triggered_by: str | None = None,
 	ignore_permissions: bool = False,
 ) -> dict:
@@ -54,7 +55,10 @@ def assign_lead(
 
 	frappe.flags.crm_lead_assignment_in_progress = True
 	try:
-		frappe.db.set_value("CRM Lead", lead, "lead_owner", new_owner)
+		values = {"lead_owner": new_owner}
+		if source:
+			values["source"] = source
+		frappe.db.set_value("CRM Lead", lead, values)
 		if old_owner:
 			decrement_agent(old_owner, old_team)
 		increment_agent(new_owner, team, reassigned=bool(old_owner))
@@ -152,6 +156,7 @@ def auto_assign_lead(lead: str, *, event_type: str = "Manual", queue: str | None
 				strategy=rule.strategy,
 				queue=queue,
 				team=rule.fallback_team or rule.team or settings.fallback_team,
+				source=rule.target_source,
 				triggered_by=event_type,
 				ignore_permissions=True,
 			)
@@ -165,6 +170,7 @@ def auto_assign_lead(lead: str, *, event_type: str = "Manual", queue: str | None
 		strategy=rule.strategy,
 		queue=queue,
 		team=selected.team or rule.team,
+		source=rule.target_source,
 		triggered_by=event_type,
 		ignore_permissions=True,
 	)

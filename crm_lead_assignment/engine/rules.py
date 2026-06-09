@@ -23,6 +23,7 @@ def match_rule(lead: dict, *, event_type: str | None = None) -> frappe._dict | N
 			"strategy",
 			"team",
 			"target_agents",
+			"target_source",
 			"pipeline",
 			"source_id_values",
 			"source",
