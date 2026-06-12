@@ -7,6 +7,8 @@ DEFAULT_SETTINGS = {
 	"enabled": 1,
 	"queue_enabled": 1,
 	"auto_assign_on_insert": 1,
+	"inline_assign_on_insert": 1,
+	"override_api_owner_when_rule_matches": 0,
 	"auto_reassign_on_update": 0,
 	"disable_manual_assign_to": 1,
 	"enforce_team_leader_guard": 1,
@@ -46,4 +48,3 @@ def get_settings() -> frappe._dict:
 
 def is_enabled() -> bool:
 	return bool(get_settings().enabled)
-

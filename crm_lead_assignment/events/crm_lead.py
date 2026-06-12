@@ -3,8 +3,10 @@ from __future__ import annotations
 import frappe
 
 from crm_lead_assignment.engine.queue import enqueue_lead
-from crm_lead_assignment.engine.service import can_auto_assign_lead
+from crm_lead_assignment.engine.rules import match_rule
+from crm_lead_assignment.engine.service import auto_assign_lead, can_auto_assign_lead
 from crm_lead_assignment.engine.sync import sync_assignment_helpers
+from crm_lead_assignment.integrations.dedupe import should_skip_lead
 from crm_lead_assignment.settings import get_settings
 
 WATCH_FIELDS = {
@@ -35,7 +37,7 @@ def before_validate(doc, method: str | None = None) -> None:
 	if not settings.enabled or not doc.is_new():
 		return
 
-	if doc.get("lead_owner"):
+	if doc.get("lead_owner") and _should_override_api_owner(doc, settings):
 		doc.set("lead_owner", None)
 		if hasattr(doc, "team"):
 			doc.set("team", None)
@@ -55,6 +57,9 @@ def after_insert(doc, method: str | None = None) -> None:
 
 	if settings.auto_assign_on_insert:
 		if not can_auto_assign_lead(doc.name, event_type="Insert"):
+			return
+		if settings.inline_assign_on_insert:
+			frappe.db.after_commit.add(lambda lead=doc.name: _assign_insert_inline_or_queue(lead))
 			return
 		enqueue_lead(doc.name, event_type="Insert", process_now=True)
 
@@ -82,3 +87,26 @@ def on_update(doc, method: str | None = None) -> None:
 
 def _has_changed(doc, fieldname: str) -> bool:
 	return hasattr(doc, fieldname) and doc.has_value_changed(fieldname)
+
+
+def _should_override_api_owner(doc, settings) -> bool:
+	if not settings.auto_assign_on_insert or not settings.override_api_owner_when_rule_matches:
+		return False
+
+	row = frappe._dict(doc.as_dict())
+	skip, _reason = should_skip_lead(row)
+	if skip:
+		return False
+
+	row.lead_owner = None
+	return bool(match_rule(row, event_type="Insert"))
+
+
+def _assign_insert_inline_or_queue(lead: str) -> None:
+	try:
+		auto_assign_lead(lead, event_type="Insert")
+		frappe.db.commit()
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "Inline CRM Lead Assignment Failed")
+		enqueue_lead(lead, event_type="Insert", process_now=True)
+		frappe.db.commit()

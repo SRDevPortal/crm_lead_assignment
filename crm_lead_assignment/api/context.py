@@ -20,10 +20,11 @@ def get_crm_lead_assignment_context() -> dict:
 		"user": user,
 		"enabled": bool(settings.enabled),
 		"disable_manual_assign_to": bool(settings.disable_manual_assign_to),
+		"inline_assign_on_insert": bool(settings.inline_assign_on_insert),
+		"override_api_owner_when_rule_matches": bool(settings.override_api_owner_when_rule_matches),
 		"can_manage_assignment": is_privileged(user) or is_effective_team_leader(user),
 		"is_privileged": is_privileged(user),
 		"has_team_leader_role": has_team_leader_role(user),
 		"has_agent_role": has_agent_role(user),
 		"managed_team_users": get_managed_team_users(user),
 	}
-

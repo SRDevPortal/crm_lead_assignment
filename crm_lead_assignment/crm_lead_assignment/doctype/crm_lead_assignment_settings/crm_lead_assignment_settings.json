@@ -9,6 +9,8 @@
   "enabled",
   "queue_enabled",
   "auto_assign_on_insert",
+  "inline_assign_on_insert",
+  "override_api_owner_when_rule_matches",
   "auto_reassign_on_update",
   "disable_manual_assign_to",
   "guards_section",
@@ -54,6 +56,20 @@
    "fieldname": "auto_assign_on_insert",
    "fieldtype": "Check",
    "label": "Auto Assign On Insert"
+  },
+  {
+   "default": "1",
+   "description": "Assign matching insert leads inside the create request instead of waiting for the background queue.",
+   "fieldname": "inline_assign_on_insert",
+   "fieldtype": "Check",
+   "label": "Inline Assign On Insert"
+  },
+  {
+   "default": "0",
+   "description": "When enabled, a matching assignment rule can replace a lead_owner supplied during API lead creation.",
+   "fieldname": "override_api_owner_when_rule_matches",
+   "fieldtype": "Check",
+   "label": "Override API Owner When Rule Matches"
   },
   {
    "default": "0",
@@ -212,4 +228,3 @@
  "states": [],
  "track_changes": 1
 }
-

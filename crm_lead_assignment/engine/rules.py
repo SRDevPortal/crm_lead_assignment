@@ -13,33 +13,36 @@ from crm_lead_assignment.engine.context import (
 
 
 def match_rule(lead: dict, *, event_type: str | None = None) -> frappe._dict | None:
+	fields = [
+		"name",
+		"rule_name",
+		"priority",
+		"strategy",
+		"team",
+		"target_agents",
+		"pipeline",
+		"source_id_values",
+		"source",
+		"campaign",
+		"campaign_values",
+		"status",
+		"disposition",
+		"lead_score_min",
+		"lead_score_max",
+		"only_if_unassigned",
+		"max_open_leads_per_agent",
+		"reassign_after_minutes",
+		"fallback_user",
+		"fallback_team",
+		"metadata_filters_json",
+	]
+	if frappe.db.has_column("CRM Lead Assignment Rule", "target_source"):
+		fields.insert(6, "target_source")
+
 	rules = frappe.get_all(
 		"CRM Lead Assignment Rule",
 		filters={"enabled": 1},
-		fields=[
-			"name",
-			"rule_name",
-			"priority",
-			"strategy",
-			"team",
-			"target_agents",
-			"target_source",
-			"pipeline",
-			"source_id_values",
-			"source",
-			"campaign",
-			"campaign_values",
-			"status",
-			"disposition",
-			"lead_score_min",
-			"lead_score_max",
-			"only_if_unassigned",
-			"max_open_leads_per_agent",
-			"reassign_after_minutes",
-			"fallback_user",
-			"fallback_team",
-			"metadata_filters_json",
-		],
+		fields=fields,
 		order_by="priority asc, modified asc",
 		limit_page_length=0,
 	)
