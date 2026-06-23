@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import cint
 
 from crm_lead_assignment.engine.audit import log_assignment
 from crm_lead_assignment.engine.context import get_lead_context, snapshot_json
 from crm_lead_assignment.engine.counters import decrement_agent, increment_agent
-from crm_lead_assignment.engine.eligibility import get_candidate_agents
-from crm_lead_assignment.engine.rules import match_rule
+from crm_lead_assignment.engine.eligibility import get_candidate_agents, is_user_session_available
+from crm_lead_assignment.engine.rules import match_rule, match_unassign_rule
 from crm_lead_assignment.engine.strategies import select_agent
 from crm_lead_assignment.engine.sync import clear_assignment_helpers, sync_assignment_helpers
 from crm_lead_assignment.integrations.dedupe import should_skip_lead
@@ -131,6 +132,8 @@ def auto_assign_lead(lead: str, *, event_type: str = "Manual", queue: str | None
 	rule = match_rule(row, event_type=event_type)
 	if not rule:
 		if settings.fallback_user:
+			if not _fallback_allowed(settings.fallback_user, settings):
+				return _skip(lead, "No rule matched; fallback user has no active session", event_type, queue, row=row)
 			return assign_lead(
 				lead,
 				settings.fallback_user,
@@ -148,10 +151,19 @@ def auto_assign_lead(lead: str, *, event_type: str = "Manual", queue: str | None
 	if not selected:
 		fallback = rule.fallback_user or settings.fallback_user
 		if fallback:
+			if not _fallback_allowed(fallback, settings):
+				return _skip(
+					lead,
+					f"No available online agent for rule {rule.name}; fallback user has no active session",
+					event_type,
+					queue,
+					row=row,
+					rule=rule,
+				)
 			return assign_lead(
 				lead,
 				fallback,
-				reason=f"No eligible agent for rule {rule.name}; fallback user selected",
+				reason=f"No available online agent for rule {rule.name}; fallback user selected",
 				rule=rule.name,
 				strategy=rule.strategy,
 				queue=queue,
@@ -176,6 +188,27 @@ def auto_assign_lead(lead: str, *, event_type: str = "Manual", queue: str | None
 	)
 
 
+def auto_unassign_lead(lead: str, *, event_type: str = "Update", queue: str | None = None) -> dict:
+	settings = get_settings()
+	if not settings.enabled:
+		return _skip(lead, "Assignment app disabled", event_type, queue)
+
+	row = get_lead_context(lead, for_update=True)
+	if not row.get("lead_owner"):
+		return _skip(lead, "Lead is already unassigned", event_type, queue, row=row)
+
+	rule = match_unassign_rule(row, event_type=event_type)
+	if not rule:
+		return _skip(lead, "No unassign rule matched", event_type, queue, row=row)
+
+	return clear_lead_assignment(
+		lead,
+		reason=f"Auto unassignment by rule {rule.name}",
+		queue=queue,
+		triggered_by=event_type,
+	)
+
+
 def can_auto_assign_lead(lead: str, *, event_type: str = "Manual") -> bool:
 	settings = get_settings()
 	if not settings.enabled:
@@ -187,6 +220,23 @@ def can_auto_assign_lead(lead: str, *, event_type: str = "Manual") -> bool:
 		return False
 
 	return bool(match_rule(row, event_type=event_type) or settings.fallback_user)
+
+
+def can_auto_unassign_lead(lead: str, *, event_type: str = "Update") -> bool:
+	settings = get_settings()
+	if not settings.enabled:
+		return False
+
+	row = get_lead_context(lead)
+	if not row.get("lead_owner"):
+		return False
+	return bool(match_unassign_rule(row, event_type=event_type))
+
+
+def _fallback_allowed(user: str, settings: frappe._dict) -> bool:
+	if cint(settings.allow_fallback_without_active_session):
+		return True
+	return is_user_session_available(user)
 
 
 def _skip(

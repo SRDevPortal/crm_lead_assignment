@@ -12,6 +12,9 @@
   "inline_assign_on_insert",
   "override_api_owner_when_rule_matches",
   "auto_reassign_on_update",
+  "auto_unassign_on_update",
+  "enable_metadata_based_assignment",
+  "allow_fallback_without_active_session",
   "disable_manual_assign_to",
   "guards_section",
   "enforce_team_leader_guard",
@@ -76,6 +79,27 @@
    "fieldname": "auto_reassign_on_update",
    "fieldtype": "Check",
    "label": "Auto Reassign On Update"
+  },
+  {
+   "default": "1",
+   "description": "Evaluate rule unassign conditions when CRM Lead metadata/status changes.",
+   "fieldname": "auto_unassign_on_update",
+   "fieldtype": "Check",
+   "label": "Auto Unassign On Update"
+  },
+  {
+   "default": "0",
+   "description": "When enabled, rule Metadata Filters are used for field-wise lead matching.",
+   "fieldname": "enable_metadata_based_assignment",
+   "fieldtype": "Check",
+   "label": "Enable Metadata Based Assignment"
+  },
+  {
+   "default": "0",
+   "description": "When disabled, fallback users are also required to have an active session.",
+   "fieldname": "allow_fallback_without_active_session",
+   "fieldtype": "Check",
+   "label": "Allow Fallback Without Active Session"
   },
   {
    "default": "1",

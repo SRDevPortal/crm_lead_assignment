@@ -4,7 +4,7 @@ import frappe
 from frappe.utils import add_to_date, now_datetime
 
 from crm_lead_assignment.engine.queue import due_queue_names, enqueue_queue_item, mark_retry, try_lock
-from crm_lead_assignment.engine.service import auto_assign_lead
+from crm_lead_assignment.engine.service import auto_assign_lead, auto_unassign_lead
 from crm_lead_assignment.settings import get_settings
 
 
@@ -14,8 +14,12 @@ def process_assignment_queue_item(queue_name: str) -> dict | None:
 		return None
 
 	try:
-		result = auto_assign_lead(row.lead, event_type=row.event_type, queue=queue_name)
-		status = "Assigned" if result.get("status") == "ok" else "Skipped"
+		if row.event_type == "Unassign":
+			result = auto_unassign_lead(row.lead, event_type=row.event_type, queue=queue_name)
+			status = "Cancelled" if result.get("status") == "ok" else "Skipped"
+		else:
+			result = auto_assign_lead(row.lead, event_type=row.event_type, queue=queue_name)
+			status = "Assigned" if result.get("status") == "ok" else "Skipped"
 		frappe.db.set_value(
 			"CRM Lead Assignment Queue",
 			queue_name,

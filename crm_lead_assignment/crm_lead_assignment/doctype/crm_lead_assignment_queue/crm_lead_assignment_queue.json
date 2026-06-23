@@ -36,7 +36,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Event Type",
-   "options": "Insert\nUpdate\nManual\nBulk\nReassign\nStale\nRepair"
+   "options": "Insert\nUpdate\nManual\nBulk\nReassign\nStale\nRepair\nUnassign"
   },
   {
    "default": "Pending",
@@ -142,4 +142,3 @@
  "states": [],
  "track_changes": 1
 }
-

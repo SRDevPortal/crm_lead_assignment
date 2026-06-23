@@ -15,4 +15,5 @@ class CRMLeadAssignmentSettings(Document):
 			self.bulk_inline_limit = 20
 		if not self.queue_batch_size:
 			self.queue_batch_size = 100
-
+		if self.auto_unassign_on_update is None:
+			self.auto_unassign_on_update = 1

@@ -11,6 +11,7 @@
   "enabled",
   "priority",
   "strategy",
+  "assign_to_users",
   "team",
   "target_agents",
   "target_source",
@@ -30,6 +31,12 @@
   "reassign_after_minutes",
   "fallback_user",
   "fallback_team",
+  "metadata_filters_section",
+  "metadata_filters",
+  "unassign_section",
+  "unassign_enabled",
+  "unassign_condition",
+  "unassign_metadata_filters",
   "metadata_section",
   "metadata_filters_json"
  ],
@@ -65,6 +72,13 @@
    "options": "Round Robin\nBalanced Load\nWeighted Balanced\nSkill Based"
   },
   {
+   "fieldname": "assign_to_users",
+   "fieldtype": "Table",
+   "label": "Assign To Users",
+   "options": "CRM Lead Assignment Rule User"
+  },
+  {
+   "description": "Legacy team filter. New rules should use Assign To Users.",
    "fieldname": "team",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -179,9 +193,44 @@
    "options": "Team"
   },
   {
-   "fieldname": "metadata_section",
+   "fieldname": "metadata_filters_section",
    "fieldtype": "Section Break",
    "label": "Metadata Filters"
+  },
+  {
+   "fieldname": "metadata_filters",
+   "fieldtype": "Table",
+   "label": "Metadata Filters",
+   "options": "CRM Lead Assignment Metadata Filter"
+  },
+  {
+   "fieldname": "unassign_section",
+   "fieldtype": "Section Break",
+   "label": "Unassign"
+  },
+  {
+   "default": "0",
+   "fieldname": "unassign_enabled",
+   "fieldtype": "Check",
+   "label": "Unassign Enabled"
+  },
+  {
+   "description": "Simple Python Expression. Example: status in (\"Closed\", \"Converted\")",
+   "fieldname": "unassign_condition",
+   "fieldtype": "Code",
+   "label": "Unassign Condition",
+   "options": "PythonExpression"
+  },
+  {
+   "fieldname": "unassign_metadata_filters",
+   "fieldtype": "Table",
+   "label": "Unassign Metadata Filters",
+   "options": "CRM Lead Assignment Metadata Filter"
+  },
+  {
+   "fieldname": "metadata_section",
+   "fieldtype": "Section Break",
+   "label": "Legacy Metadata JSON"
   },
   {
    "fieldname": "metadata_filters_json",

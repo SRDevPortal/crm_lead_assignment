@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, time
 
 import frappe
+from frappe.sessions import get_expired_threshold
 from frappe.utils import get_time, now_datetime
 
 from crm_lead_assignment.engine.context import get_campaign, get_pipeline
@@ -10,6 +11,10 @@ from crm_lead_assignment.integrations.role_permissions import agent_allowed_for_
 
 
 def get_candidate_agents(rule: frappe._dict | None, lead: dict, *, team: str | None = None) -> list[frappe._dict]:
+	if _has_rule_users(rule):
+		rule_user_candidates = _get_rule_user_candidates(rule, lead)
+		return rule_user_candidates
+
 	target_team = team or (rule.team if rule else None)
 	conditions = ["s.active = 1", "ifnull(u.enabled, 0) = 1"]
 	params = {}
@@ -48,7 +53,99 @@ def get_candidate_agents(rule: frappe._dict | None, lead: dict, *, team: str | N
 	return [frappe._dict(row) for row in rows if _is_eligible(row, rule, lead)]
 
 
+def is_user_session_available(user: str | None) -> bool:
+	if not user:
+		return False
+	if not frappe.db.exists("User", {"name": user, "enabled": 1}):
+		return False
+
+	return bool(
+		frappe.db.sql(
+			"""
+			select sid
+			from `tabSessions`
+			where user = %s
+			  and status = 'Active'
+			  and lastupdate >= %s
+			limit 1
+			""",
+			(user, get_expired_threshold()),
+		)
+	)
+
+
+def _get_rule_user_candidates(rule: frappe._dict | None, lead: dict) -> list[frappe._dict]:
+	if not _has_rule_users(rule):
+		return []
+
+	rows = frappe.db.sql(
+		"""
+		select
+			ru.name,
+			ru.user as agent,
+			coalesce(s.team, %(team)s) as team,
+			coalesce(nullif(ru.weight, 0), nullif(s.weight, 0), 1) as weight,
+			coalesce(nullif(ru.capacity, 0), nullif(s.capacity, 0), 0) as capacity,
+			coalesce(s.current_open_leads, 0) as current_open_leads,
+			coalesce(s.today_assigned_count, 0) as today_assigned_count,
+			coalesce(s.today_reassigned_count, 0) as today_reassigned_count,
+			s.last_assigned_at,
+			coalesce(s.load_score, 0) as load_score,
+			s.allowed_pipelines,
+			s.allowed_sources,
+			s.allowed_campaigns,
+			s.skill_tags,
+			s.shift_start,
+			s.shift_end,
+			coalesce(ru.max_daily_assignments, 0) as max_daily_assignments
+		from `tabCRM Lead Assignment Rule User` ru
+		inner join `tabUser` u on u.name = ru.user and ifnull(u.enabled, 0) = 1
+		left join `tabCRM Lead Assignment Agent State` s
+			on s.name = (
+				select state.name
+				from `tabCRM Lead Assignment Agent State` state
+				where state.agent = ru.user
+				order by
+					case when state.team = %(team)s then 0 else 1 end,
+					state.current_open_leads desc,
+					state.modified desc
+				limit 1
+			)
+		where ru.parent = %(rule)s
+		  and ru.parenttype = 'CRM Lead Assignment Rule'
+		  and ru.parentfield = 'assign_to_users'
+		  and ifnull(ru.enabled, 1) = 1
+		  and ru.user is not null
+		  and ru.user != ''
+		order by load_score asc, last_assigned_at asc, ru.idx asc
+		""",
+		{"rule": rule.name, "team": rule.get("team")},
+		as_dict=True,
+	)
+
+	return [frappe._dict(row) for row in rows if _is_eligible(row, rule, lead)]
+
+
+def _has_rule_users(rule: frappe._dict | None) -> bool:
+	if not rule or not frappe.db.exists("DocType", "CRM Lead Assignment Rule User"):
+		return False
+	return bool(
+		frappe.db.exists(
+			"CRM Lead Assignment Rule User",
+			{
+				"parent": rule.name,
+				"parenttype": "CRM Lead Assignment Rule",
+				"parentfield": "assign_to_users",
+				"enabled": 1,
+			},
+		)
+	)
+
+
 def _is_eligible(row: dict, rule: frappe._dict | None, lead: dict) -> bool:
+	if not is_user_session_available(row.get("agent")):
+		return False
+
 	if not _allowed_by_list((rule or {}).get("target_agents"), row.get("agent")):
 		return False
 
@@ -56,6 +153,9 @@ def _is_eligible(row: dict, rule: frappe._dict | None, lead: dict) -> bool:
 	rule_cap = int((rule or {}).get("max_open_leads_per_agent") or 0)
 	effective_capacity = min([value for value in (capacity, rule_cap) if value] or [0])
 	if effective_capacity and int(row.get("current_open_leads") or 0) >= effective_capacity:
+		return False
+	max_daily = int(row.get("max_daily_assignments") or 0)
+	if max_daily and int(row.get("today_assigned_count") or 0) >= max_daily:
 		return False
 
 	pipeline = get_pipeline(lead)

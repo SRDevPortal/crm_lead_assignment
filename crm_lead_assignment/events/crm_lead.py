@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import cint
 
 from crm_lead_assignment.engine.queue import enqueue_lead
 from crm_lead_assignment.engine.rules import match_rule
-from crm_lead_assignment.engine.service import auto_assign_lead, can_auto_assign_lead
+from crm_lead_assignment.engine.service import (
+	auto_assign_lead,
+	auto_unassign_lead,
+	can_auto_assign_lead,
+	can_auto_unassign_lead,
+)
 from crm_lead_assignment.engine.sync import sync_assignment_helpers
 from crm_lead_assignment.integrations.dedupe import should_skip_lead
 from crm_lead_assignment.settings import get_settings
@@ -76,10 +82,13 @@ def on_update(doc, method: str | None = None) -> None:
 		sync_assignment_helpers(doc.name, doc.get("lead_owner"), team=doc.get("team"))
 		return
 
-	if not settings.auto_reassign_on_update:
-		return
-
 	if any(_has_changed(doc, fieldname) for fieldname in WATCH_FIELDS):
+		if cint(settings.auto_unassign_on_update) and can_auto_unassign_lead(doc.name, event_type="Update"):
+			enqueue_lead(doc.name, event_type="Unassign", process_now=True)
+			return
+
+		if not cint(settings.auto_reassign_on_update):
+			return
 		if not can_auto_assign_lead(doc.name, event_type="Update"):
 			return
 		enqueue_lead(doc.name, event_type="Update", process_now=True)
