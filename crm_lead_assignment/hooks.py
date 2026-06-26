@@ -57,7 +57,7 @@ override_whitelisted_methods = {
 	"frappe.desk.form.assign_to.clear": "crm_lead_assignment.api.assign_guard.clear",
 }
 
-fixtures = [
-	{"dt": "Custom Field", "filters": [["module", "=", "CRM Lead Assignment"]]},
-	{"dt": "Property Setter", "filters": [["module", "=", "CRM Lead Assignment"]]},
-]
+# fixtures = [
+# 	{"dt": "Custom Field", "filters": [["module", "=", "CRM Lead Assignment"]]},
+# 	{"dt": "Property Setter", "filters": [["module", "=", "CRM Lead Assignment"]]},
+# ]
