@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import frappe
+
+from crm_lead_assignment.number_privacy import mask_text
 from frappe.utils import cint
 
 from crm_lead_assignment.engine.queue import enqueue_lead
@@ -116,6 +118,6 @@ def _assign_insert_inline_or_queue(lead: str) -> None:
 		auto_assign_lead(lead, event_type="Insert")
 		frappe.db.commit()
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Inline CRM Lead Assignment Failed")
+		frappe.log_error(mask_text(frappe.get_traceback()), "Inline CRM Lead Assignment Failed")
 		enqueue_lead(lead, event_type="Insert", process_now=True)
 		frappe.db.commit()

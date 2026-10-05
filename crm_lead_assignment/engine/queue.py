@@ -4,6 +4,7 @@ import frappe
 from frappe.utils import add_to_date, now_datetime
 
 from crm_lead_assignment.engine.context import get_lead_context, snapshot_hash, snapshot_json
+from crm_lead_assignment.number_privacy import sanitize_for_storage
 from crm_lead_assignment.settings import get_settings
 
 QUEUE_DOCTYPE = "CRM Lead Assignment Queue"
@@ -85,7 +86,7 @@ def mark_retry(queue_name: str, error: str, attempts: int) -> None:
 		queue_name,
 		{
 			"status": status,
-			"error": error[:1000],
+			"error": sanitize_for_storage(error)[:1000],
 			"next_retry_at": next_retry_at,
 			"locked_by": None,
 			"locked_at": None,

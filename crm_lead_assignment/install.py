@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import frappe
 
+from crm_lead_assignment.number_privacy import mask_text
+
 
 def after_install() -> None:
 	after_migrate()
@@ -16,7 +18,7 @@ def after_migrate() -> None:
 
 		sync_from_teams()
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "CRM Lead Assignment Agent State Sync Failed")
+		frappe.log_error(mask_text(frappe.get_traceback()), "CRM Lead Assignment Agent State Sync Failed")
 
 	if frappe.db.exists("DocType", "CRM Lead Assignment Settings"):
 		settings = frappe.get_single("CRM Lead Assignment Settings")

@@ -9,10 +9,12 @@ from crm_lead_assignment.integrations.role_permissions import (
 	is_effective_team_leader,
 	is_privileged,
 )
+from crm_lead_assignment.number_privacy import browser_response
 from crm_lead_assignment.settings import get_settings
 
 
 @frappe.whitelist()
+@browser_response
 def get_crm_lead_assignment_context() -> dict:
 	user = frappe.session.user
 	settings = get_settings()
